@@ -1,0 +1,15 @@
+﻿@page "/"
+@inherits AppStateComponent
+
+<div class="card-columns">
+    @if (OMWPlannerState.OMWProjects != null)
+    {
+        foreach (var issue in AppState.JiraIssues)
+        {
+            <JiraIssueCard IssueId="@issue"></JiraIssueCard>
+        }
+    }
+</div>
+
+@code {
+}

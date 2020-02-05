@@ -1,0 +1,42 @@
+﻿@inherits AppStateComponent
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="">OMW Planner</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
+        <i class="fas fa-hamburger"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+    </div>
+    <div class="col"></div>
+    <div class="col-auto">
+        <button class="btn btn-outline-info" @onclick="@(() => Mediator.Send(new AppState.ToggleJiraStatusAccordianAction()))">
+            <i class="fas fa-list"></i>
+        </button>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-success" disabled="@Busy" @onclick="Refresh">
+            <i class="fas fa-sync @(Busy ? "fa-spin" : string.Empty)"></i>
+        </button>
+    </div>
+</nav>
+<JiraStatusAccordion></JiraStatusAccordion>
+
+@code {
+    bool Busy { get; set; }
+    async Task Refresh()
+    {
+        Busy = true;
+        await Mediator.Send(new OMWPlannerState.RefreshAction
+        {
+            JiraProject = "OMW"
+        });
+        Busy = false;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+}

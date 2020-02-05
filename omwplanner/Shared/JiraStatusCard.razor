@@ -1,0 +1,51 @@
+﻿@inherits AppStateComponent
+
+@if (OMWPlannerState.JiraStatuses != null)
+{
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-auto align-self-center">
+                    <img src="@StatusType.iconUrl" />
+                </div>
+                <div class="col">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" disabled="@(Issues.Count() == 0)" data-target="@("#id-" + StatusId)">
+                            @StatusType?.name @(Issues.Count() > 0 ? $"({Issues.Count()})" : "")
+                        </button>
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <div id="@("id-" + StatusId)" class="collapse" data-parent="@DataParent">
+            <div class="card-body">
+                <div class="list-group">
+                    @foreach (var issue in Issues)
+                    {
+                        <a href="#" class="list-group-item list-group-item-action"
+                           @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction { IssueId = issue.id }))">
+                            <div class="row">
+                                <div class="col-auto">
+                                    @issue.key
+                                </div>
+                                <div class="col">
+                                    @issue.fields.summary
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string DataParent { get; set; }
+    [Parameter]
+    public string StatusId { get; set; }
+    Jira.Response.Status StatusType => OMWPlannerState.JiraStatuses.FirstOrDefault(s => s.id.Equals(StatusId));
+    IEnumerable<Jira.Response.Issue> Issues => OMWPlannerState.JiraIssues.Where(e
+        => e.fields.status.id.Equals(StatusId));
+}

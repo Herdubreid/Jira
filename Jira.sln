@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29721.120
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.Jira", "Celin.Jira\Celin.Jira.csproj", "{4EDF95D7-3A13-49B3-9A20-4F7363258D8D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{34579C0B-FFC9-4D6A-8C3C-D33A1F443BDC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D} = {1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Celin.OMW", "Celin.OMW\Celin.OMW.csproj", "{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "omwplanner", "omwplanner\omwplanner.csproj", "{89919AE9-8FD5-43C1-9CB2-7A492F5FBD1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Celin.OMWPlanner", "Celin.OMWPlanner\Celin.OMWPlanner.csproj", "{1AF52E6B-64B3-4D8B-91CA-933975176D2C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4EDF95D7-3A13-49B3-9A20-4F7363258D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EDF95D7-3A13-49B3-9A20-4F7363258D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EDF95D7-3A13-49B3-9A20-4F7363258D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EDF95D7-3A13-49B3-9A20-4F7363258D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34579C0B-FFC9-4D6A-8C3C-D33A1F443BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34579C0B-FFC9-4D6A-8C3C-D33A1F443BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34579C0B-FFC9-4D6A-8C3C-D33A1F443BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34579C0B-FFC9-4D6A-8C3C-D33A1F443BDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FCF9E05-6773-4F72-BD11-B2ACD1AEC86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89919AE9-8FD5-43C1-9CB2-7A492F5FBD1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89919AE9-8FD5-43C1-9CB2-7A492F5FBD1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89919AE9-8FD5-43C1-9CB2-7A492F5FBD1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89919AE9-8FD5-43C1-9CB2-7A492F5FBD1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AF52E6B-64B3-4D8B-91CA-933975176D2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AF52E6B-64B3-4D8B-91CA-933975176D2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AF52E6B-64B3-4D8B-91CA-933975176D2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AF52E6B-64B3-4D8B-91CA-933975176D2C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4B24F839-2728-416A-ACF7-4A21377DEA75}
+	EndGlobalSection
+EndGlobal

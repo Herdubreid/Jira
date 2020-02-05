@@ -1,0 +1,57 @@
+﻿@inherits AppStateComponent
+
+<div class="card shadow m-2">
+    <div class="card-header p-0">
+        <div class="row no-gutters">
+            <div class="col-auto dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle border-0" type="button" data-toggle="dropdown">
+                    <img src="@Issue.fields.issuetype.iconUrl" /> @Issue.fields.issuetype.name
+                </button>
+                <div class="dropdown-menu">
+                    @foreach (var t in IssueTypes)
+                    {
+                        <a class="dropdown-item" href="#">
+                            <img src="@t.iconUrl" /> @t.name
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col"></div>
+            <div class="col-auto">
+                <button class="btn btn-sm btn-outline-warning border-0" @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction
+                                                                           { IssueId = Issue.id }))">
+                    <i class="fas fa-window-minimize"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="card-title">
+            <div class="row no-gutters">
+                <h5 class="col">
+                    @Issue.key
+                </h5>
+                <div class="col-auto">
+                    <button class="btn btn-outline-secondary border-0" type="button">
+                        <img src="@Issue.fields.status.iconUrl" /> @Issue.fields.status.name
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p>@Issue.fields.summary</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string IssueId { get; set; }
+    Jira.Response.Issue Issue => OMWPlannerState
+        .JiraIssues
+        .FirstOrDefault(i => i.id.Equals(IssueId));
+    IEnumerable<Jira.Response.IssueType> IssueTypes => OMWPlannerState
+        .JiraProject
+        .issueTypes
+        .Where(t => !t.subtask)
+        .Except(new Jira.Response.IssueType[] { Issue.fields.issuetype },
+                new Jira.Response.ComparableBase<Jira.Response.IssueType>());
+}

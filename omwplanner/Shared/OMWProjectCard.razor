@@ -1,0 +1,16 @@
+﻿<div class="card shadow m-2">
+    <h5 class="card-header">@Row.F98220_OMWDESC</h5>
+    <div class="card-body">
+        <div class="row">
+            <div class="col">ID: @Row.F98220_OMWPRJID</div>
+            <div class="col">Status: @Row.F98220_OMWCD</div>
+            <div class="col">User: @Row.F98220_USER</div>
+            <div class="col">Started: @Row.F98220_OMWPD</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public F98220.Row Row { get; set; }
+}

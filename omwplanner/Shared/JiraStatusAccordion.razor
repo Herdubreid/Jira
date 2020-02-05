@@ -1,0 +1,16 @@
+﻿@inherits AppStateComponent
+
+<div id="overlay">
+    @if (AppState.MaxStatusAccordion)
+    {
+        <div id="projects" class="jumbotron p-2">
+            @foreach (var s in OMWPlannerState.Config.GetSection("jiraStatuses").GetChildren())
+            {
+                <JiraStatusCard DataParent="#projects" StatusId="@s.Value"></JiraStatusCard>
+            }
+        </div>
+    }
+</div>
+
+@code {
+}
