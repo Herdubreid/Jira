@@ -9,6 +9,10 @@ namespace Celin.Jira
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var json = JsonSerializer.Deserialize<string>(ref reader, options);
+            if (string.IsNullOrEmpty(json))
+            {
+                return DateTime.MinValue;
+            }
             return DateTime.Parse(json);
         }
 

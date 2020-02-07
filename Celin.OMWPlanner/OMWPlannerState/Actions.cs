@@ -38,7 +38,10 @@ namespace Celin
             public string Code { get; set; }
             public string Release { get; set; }
         }
-        public class RefreshAction : IAction { }
+        public class RefreshAction : IAction
+        {
+            public bool Force { get; set; }
+        }
         public class DemoFormAction : IAction
         {
             public string FormName { get; set; }

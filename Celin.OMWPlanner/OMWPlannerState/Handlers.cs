@@ -185,7 +185,7 @@ namespace Celin
                 try
                 {
                     await lockit.WaitAsync();
-                    if (DateTime.Now - State.LastUpdate > TimeSpan.FromHours(1d))
+                    if (aAction.Force || DateTime.Now - State.LastUpdate > TimeSpan.FromHours(1d))
                     {
                         State.LastUpdate = DateTime.Now;
                         var tasks = new Task[]

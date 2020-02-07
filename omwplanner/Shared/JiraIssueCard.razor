@@ -51,7 +51,7 @@
             <div class="card-title">
                 <div class="row no-gutters align-items-center">
                     <h5 class="col mb-0">
-                        @Issue.key
+                        <a href="@JiraUrl" target="_blank">@Issue.key</a>
                     </h5>
                     <div class="col-auto">
                         <button class="btn btn-outline-info border-0" type="button" disabled="@(Transitions != null || Busy)" @onclick="@GetTransitions">
@@ -114,6 +114,7 @@
     [Parameter]
     public string IssueId { get; set; }
     bool Busy { get; set; }
+    string JiraUrl => $"https://herdubreid.atlassian.net/browse/{Issue.key}";
     string TimePatternError { get; set; }
     Jira.Response.Issue Issue => OMWPlannerState
         .JiraIssues
@@ -167,7 +168,7 @@
             }
         });
         estimate = Issue.fields.timetracking?.originalEstimate;
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
     async Task GetTransitions()
     {
