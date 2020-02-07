@@ -11,7 +11,7 @@
                 <div class="col">
                     <h5 class="mb-0">
                         <button class="btn btn-link" data-toggle="collapse" disabled="@(Issues.Count() == 0)" data-target="@("#id-" + StatusId)">
-                            @StatusType?.name @(Issues.Count() > 0 ? $"({Issues.Count()})" : "")
+                            @StatusType?.name <span class="badge badge-info">@(Issues.Count() > 0 ? $"{Issues.Count()}" : "")</span>
                         </button>
                     </h5>
                 </div>
@@ -25,6 +25,9 @@
                         <a href="#" class="list-group-item list-group-item-action"
                            @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction { IssueId = issue.id }))">
                             <div class="row">
+                                <div class="col-auto">
+                                    <i class="fas fa-angle-@Icon(issue.id) fa-2x"></i>
+                                </div>
                                 <div class="col-auto">
                                     @issue.key
                                 </div>
@@ -48,4 +51,5 @@
     Jira.Response.Status StatusType => OMWPlannerState.JiraStatuses.FirstOrDefault(s => s.id.Equals(StatusId));
     IEnumerable<Jira.Response.Issue> Issues => OMWPlannerState.JiraIssues.Where(e
         => e.fields.status.id.Equals(StatusId));
+    string Icon(string issueId) => AppState.JiraIssues.Contains(issueId) ? "right" : "left"; 
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "Test": {
       "commandName": "Project",
-      "commandLineArgs": "config jiraStatuses -a"
+      "commandLineArgs": "omw has OMW-1"
     }
   }
 }

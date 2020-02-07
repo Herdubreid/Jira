@@ -1,13 +1,25 @@
 ﻿using BlazorState;
+using System.Collections.Generic;
 
 namespace Celin
 {
     public partial class OMWPlannerState
     {
+        public class ConfigAction : IAction
+        {
+            public string JiraProjectKey { get; set; }
+            public IEnumerable<string> JiraStatusKeys { get; set; }
+        }
         public class JiraEditIssueAction : IAction
         {
             public string IssueIdOrKey { get; set; }
             public Jira.Request.Fields Fields { get; set; }
+            public Jira.Request.Update Update { get; set; }
+        }
+        public class JiraIssueTransitionAction : IAction
+        {
+            public string IssueIdOrKey { get; set; }
+            public string TransitionId { get; set; }
         }
         public class JiraIssueSearchAction : IAction
         {
@@ -26,10 +38,7 @@ namespace Celin
             public string Code { get; set; }
             public string Release { get; set; }
         }
-        public class RefreshAction : IAction
-        {
-            public string JiraProject { get; set; }
-        }
+        public class RefreshAction : IAction { }
         public class DemoFormAction : IAction
         {
             public string FormName { get; set; }

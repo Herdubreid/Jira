@@ -11,6 +11,18 @@ namespace Celin
 {
     public partial class OMWPlannerState
     {
+        public class ConfigHandler : ActionHandler<ConfigAction>
+        {
+            OMWPlannerState State => Store.GetState<OMWPlannerState>();
+            public override Task<Unit> Handle(ConfigAction aAction, CancellationToken aCancellationToken)
+            {
+                State.JiraProjectKey = aAction.JiraProjectKey;
+                State.JiraStatusKeys = aAction.JiraStatusKeys;
+
+                return Unit.Task;
+            }
+            public ConfigHandler(IStore store) : base(store) { }
+        }
         public class JiraEditIssueHandler : ActionHandler<JiraEditIssueAction>
         {
             readonly static SemaphoreSlim lockit = new SemaphoreSlim(1, 1);
@@ -21,12 +33,18 @@ namespace Celin
                 try
                 {
                     await lockit.WaitAsync();
-                    await Jira.EditIssu(aAction.IssueIdOrKey, aAction.Fields);
+                    await Jira.EditIssu(aAction.IssueIdOrKey, aAction.Fields, aAction.Update);
+                    var ndx = State.JiraIssues.FindIndex(i => i.id.Equals(aAction.IssueIdOrKey));
+                    State.JiraIssues[ndx] = await Jira.GetIssue(aAction.IssueIdOrKey);
+                    
                 }
                 finally
                 {
                     lockit.Release();
                 }
+
+                var handler = State.Changed;
+                handler?.Invoke(State, null);
 
                 return Unit.Value;
             }
@@ -35,13 +53,61 @@ namespace Celin
                 Jira = jira;
             }
         }
+        public class JiraIssueTransitionHandler : ActionHandler<JiraIssueTransitionAction>
+        {
+            readonly static SemaphoreSlim lockit = new SemaphoreSlim(1, 1);
+            AIS.Server E1 { get; }
+            Jira.Server Jira { get; }
+            OMWPlannerState State => Store.GetState<OMWPlannerState>();
+            public override async Task<Unit> Handle(JiraIssueTransitionAction aAction, CancellationToken aCancellationToken)
+            {
+                try
+                {
+                    await lockit.WaitAsync();
+                    var ndx = State.JiraIssues.FindIndex(i => i.id.Equals(aAction.IssueIdOrKey));
+                    var key = State.JiraIssues[ndx].key;
+                    await Jira.TransitionIssue(aAction.IssueIdOrKey, aAction.TransitionId);
+                    State.JiraIssues[ndx] = await Jira.GetIssue(aAction.IssueIdOrKey);
+                    if (State.JiraIssues[ndx].fields.status.id.Equals(State.JiraTriggerOMW) &&
+                        !State.OMWProjects.Contains(new F98220.Row { F98220_OMWPRJID = key }))
+                    {
+                        var rq = new W98220WC.Request();
+                        rq.Set(W98220WC.Fields.OMWPRJID, key);
+                        rq.Set(W98220WC.Fields.OMWDESC, State.JiraIssues[ndx].fields.summary);
+                        rq.Set(W98220WC.Fields.OMWTYP, "01");
+                        rq.Set(W98220WC.Fields.OMWSV, "01");
+                        rq.Set(W98220WC.Fields.SYR, "55");
+                        rq.Set(W98220WC.Fields.SRCRLS, "E920");
+                        rq.Ok();
+                        await E1.RequestAsync<W98220WC.Response>(rq);
+                        var omw = await E1.RequestAsync<F98220.Response>(new F98220.Request());
+                        State.OMWProjects = new List<F98220.Row>(omw.fs_DATABROWSE_F98220.data.gridData.rowset);
+                    }
+                }
+                finally
+                {
+                    lockit.Release();
+                }
+
+                var handler = State.Changed;
+                handler?.Invoke(State, null);
+
+                return Unit.Value;
+            }
+            public JiraIssueTransitionHandler(IStore store, Jira.Server jira, AIS.Server e1) : base(store)
+            {
+                Jira = jira;
+                E1 = e1;
+            }
+        }
         public class JiraIssueSearchHandler : ActionHandler<JiraIssueSearchAction>
         {
+            public readonly static string[] FIELDS = new string[] { "summary", "status", "issuetype", "priority", "timetracking" };
             Jira.Server Jira { get; }
             OMWPlannerState State => Store.GetState<OMWPlannerState>();
             public override async Task<Unit> Handle(JiraIssueSearchAction aAction, CancellationToken aCancellationToken)
             {
-                var issues = await Jira.Search(aAction.JQL);
+                var issues = await Jira.Search(aAction.JQL, FIELDS);
                 State.JiraIssues = new List<Jira.Response.Issue>(issues.issues);
 
                 return Unit.Value;
@@ -125,9 +191,9 @@ namespace Celin
                         var tasks = new Task[]
                         {
                             E1.RequestAsync<F98220.Response>(new F98220.Request()),
-                            Jira.GetProject(aAction.JiraProject),
-                            Jira.GetTaskTypes(aAction.JiraProject),
-                            Jira.Search($"project={aAction.JiraProject}")
+                            Jira.GetProject(State.JiraProjectKey),
+                            Jira.GetTaskTypes(State.JiraProjectKey),
+                            Jira.Search($"project={State.JiraProjectKey} AND status in ({string.Join(',', State.JiraStatusKeys)})", JiraIssueSearchHandler.FIELDS)
                         };
                         await Task.WhenAll(tasks);
 

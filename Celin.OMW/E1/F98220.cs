@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Celin.F98220
 {
-    public class Row
+    public class Row : IEquatable<Row>
     {
         public DateTime F98220_OMWPD { get; set; }
         public string F98220_OMWPS { get; set; }
@@ -14,6 +14,10 @@ namespace Celin.F98220
         public string F98220_OMWTYP { get; set; }
         public string F98220_USER { get; set; }
         public DateTime F98220_OMWCD { get; set; }
+        public bool Equals(Row other)
+        {
+            return F98220_OMWPRJID.Equals(other.F98220_OMWPRJID);
+        }
     }
     public class Response : AIS.FormResponse
     {

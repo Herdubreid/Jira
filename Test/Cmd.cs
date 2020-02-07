@@ -1,7 +1,9 @@
 ﻿using BlazorState;
 using McMaster.Extensions.CommandLineUtils;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
@@ -25,6 +27,7 @@ namespace Test
         [Command("config", Description = "Config Commands")]
         class ConfigCmd : BaseCmd
         {
+            IConfiguration Config { get; }
             [Argument(0, Description = "Parameter")]
             [Required]
             string Parameter { get; set; }
@@ -32,25 +35,43 @@ namespace Test
             bool Array { get; set; }
             void OnExecute()
             {
+                var value = Config[Parameter];
                 if (Array)
                 {
-                    var value = State.Config.GetSection(Parameter)
-                        .GetChildren()
-                        .Select(e => e.Value)
-                        .ToArray();
-                    Console.WriteLine(string.Join(", ", value));
+                    var arr = value.Split(',');
+                    foreach (var s in arr) Console.WriteLine(s);
                 }
                 else
                 {
-                    Console.WriteLine(State.Config[Parameter]);
+                    Console.WriteLine(value);
                 }
             }
-            public ConfigCmd(IStore store, IMediator mediator, Celin.Jira.Server jira) : base(store, mediator, jira) { }
+            public ConfigCmd(IStore store, IMediator mediator, Celin.Jira.Server jira, IConfiguration config) : base(store, mediator, jira)
+            {
+                Config = config;
+            }
         }
         [Command("omw", Description = "OMW Commands")]
+        [Subcommand(typeof(HasCmd))]
         [Subcommand(typeof(AddCmd))]
         class OMWCmd
         {
+            [Command("has", Description = "Test if Project Exist")]
+            class HasCmd : BaseCmd
+            {
+                [Argument(0, Description = "Project Id")]
+                [Required]
+                string Id { get; set; }
+                async Task OnExecuteAsync()
+                {
+                    await Mediator.Send(new Celin.OMWPlannerState.RefreshAction());
+                    if (State.OMWProjects.Contains(new Celin.F98220.Row { F98220_OMWPRJID = Id }))
+                    {
+                        Console.WriteLine("Found {0}!", Id);
+                    }
+                }
+                public HasCmd(IStore store, IMediator mediator, Celin.Jira.Server jira) : base(store, mediator, jira) { }
+            }
             [Command("add", Description = "Add")]
             class AddCmd : BaseCmd
             {
@@ -121,12 +142,10 @@ namespace Test
         [Command("load", Description = "Load Data")]
         class LoadCmd : BaseCmd
         {
+            IConfiguration Config { get; }
             async Task OnExecute()
             {
-                await Mediator.Send(new Celin.OMWPlannerState.RefreshAction
-                {
-                    JiraProject = "OMW"
-                });
+                await Mediator.Send(new Celin.OMWPlannerState.RefreshAction());
                 Dump();
 
                 var open = State.JiraIssues.Where(jira => !State.OMWProjects.Select(omw => omw.F98220_OMWPRJID).Contains(jira.key));
@@ -148,7 +167,10 @@ namespace Test
                     }
                 }
             }
-            public LoadCmd(IStore store, IMediator mediator, Celin.Jira.Server jira) : base(store, mediator, jira) { }
+            public LoadCmd(IStore store, IMediator mediator, Celin.Jira.Server jira, IConfiguration config) : base(store, mediator, jira)
+            {
+                Config = config;
+            }
         }
         [Command("comment", Description = "Comment Commands")]
         [Subcommand(typeof(GetCmd))]
@@ -263,9 +285,11 @@ namespace Test
             {
                 [Option("-t|--type", CommandOptionType.SingleValue, Description = "Type")]
                 int? Type { get; set; }
+                [Option("-e|--estimate", CommandOptionType.SingleValue, Description = "Estimate")]
+                string Estimate { get; set; }
                 async Task OnExecuteAsync()
                 {
-                    await Jira.EditIssu(IssueIdOrKey, new Request.Fields
+                    var fields = new Request.Fields
                     {
                         issuetype = Type.HasValue
                                 ? new Request.Id
@@ -273,7 +297,23 @@ namespace Test
                                     id = Type.Value.ToString()
                                 }
                                 : null
-                    });
+                    };
+                    var update = new Request.Update
+                    {
+                        timetracking = string.IsNullOrEmpty(Estimate)
+                        ? null
+                        : new Request.FieldUpdate<Request.Timetracking>[]
+                        {
+                            new Request.FieldUpdate<Request.Timetracking>
+                            {
+                                set = new Request.Timetracking
+                                {
+                                    originalEstimate = Estimate
+                                }
+                            }
+                        }
+                    };
+                    await Jira.EditIssu(IssueIdOrKey, fields, update);
                 }
                 public EditCmd(IStore store, IMediator mediator, Celin.Jira.Server jira) : base(store, mediator, jira) { }
             }

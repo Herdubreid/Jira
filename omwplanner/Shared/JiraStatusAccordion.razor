@@ -4,9 +4,17 @@
     @if (AppState.MaxStatusAccordion)
     {
         <div id="projects" class="jumbotron p-2">
-            @foreach (var s in OMWPlannerState.Config.GetSection("jiraStatuses").GetChildren())
+            <div class="row no-gutters justify-content-end">
+                <div class="col-auto" style="position:relative;top:-6px;right:-6px;">
+                    <button class="btn btn-sm btn-outline-warning border-0"
+                            @onclick="@(() => Mediator.Send(new AppState.ToggleJiraStatusAccordianAction()))">
+                        <i class="fas fa-window-minimize"></i>
+                    </button>
+                </div>
+            </div>
+            @foreach (var s in OMWPlannerState.JiraStatusKeys)
             {
-                <JiraStatusCard DataParent="#projects" StatusId="@s.Value"></JiraStatusCard>
+                <JiraStatusCard DataParent="#projects" StatusId="@s"></JiraStatusCard>
             }
         </div>
     }

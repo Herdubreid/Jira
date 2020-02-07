@@ -99,11 +99,19 @@ namespace Celin.Jira.Response
         public int version { get; set; }
         public IEnumerable<DocContent> content { get; set; }
     }
+    public class Timetracking
+    {
+        public string originalEstimate { get; set; }
+        public string remainingEstimate { get; set; }
+        public int originalEstimateSeconds { get; set; }
+        public int remainingEstimateSeconds { get; set; }
+    }
     public class Fields
     {
         public DateTime statuscategorychangedate { get; set; }
         public IssueType issuetype { get; set; }
         public Project project { get; set; }
+        public Timetracking timetracking { get; set; }
         public DateTime lastViewed { get; set; }
         public DateTime created { get; set; }
         public Base priority { get; set; }

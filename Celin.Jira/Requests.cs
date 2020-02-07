@@ -4,13 +4,18 @@ using System.Web;
 
 namespace Celin.Jira.Request
 {
-    public class RequestBody
+    public class RequestBody { }
+    public class EditBody : RequestBody
     {
         public Update update { get; set; }
         public Fields fields { get; set; }
         public DocFormat<ParagraphDoc<TextContent>> body { get; set; }
         public Id transition { get; set; }
+    }
+    public class SearchBody : RequestBody
+    {
         public string jql { get; set; }
+        public IEnumerable<string> fields { get; set; }
     }
     public abstract class Base
     {
@@ -53,15 +58,21 @@ namespace Celin.Jira.Request
         public string type { get; } = "paragraph";
         public IEnumerable<T> content { get; set; }
     }
+    public class Timetracking
+    {
+        public string originalEstimate { get; set; }
+        public string remainingEstimate { get; set; }
+    }
     public class FieldUpdate<T>
     {
         public T set { get; set; }
         public T add { get; set; }
+        public T edit { get; set; }
         public T remove { get; set; }
     }
     public class Update
     {
-        public FieldUpdate<string> summary { get; set; }
+        public IEnumerable<FieldUpdate<Timetracking>> timetracking { get; set; }
         public IEnumerable<FieldUpdate<string>> labels { get; set; }
     }
     public class Fields
@@ -69,8 +80,10 @@ namespace Celin.Jira.Request
         public Key project { get; set; }
         public string summary { get; set; }
         public Id issuetype { get; set; }
+        public Timetracking timetracking { get; set; }
         public DocFormat<ParagraphDoc<TextContent>> description { get; set; }
         public IEnumerable<string> labels { get; set; }
+
     }
     public class Issue : Base
     {

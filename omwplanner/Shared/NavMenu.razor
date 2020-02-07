@@ -1,4 +1,5 @@
 ﻿@inherits AppStateComponent
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="">OMW Planner</a>
@@ -29,10 +30,7 @@
     async Task Refresh()
     {
         Busy = true;
-        await Mediator.Send(new OMWPlannerState.RefreshAction
-        {
-            JiraProject = "OMW"
-        });
+        await Mediator.Send(new OMWPlannerState.RefreshAction());
         Busy = false;
     }
     protected override async Task OnInitializedAsync()

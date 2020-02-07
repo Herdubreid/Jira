@@ -1,50 +1,120 @@
 ﻿@inherits AppStateComponent
+@inject Jira.Server Jira
 
 <div class="card shadow m-2">
-    <div class="card-header p-0">
-        <div class="row no-gutters">
-            <div class="col-auto dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle border-0" type="button" data-toggle="dropdown">
-                    <img src="@Issue.fields.issuetype.iconUrl" /> @Issue.fields.issuetype.name
-                </button>
-                <div class="dropdown-menu">
-                    @foreach (var t in IssueTypes)
-                    {
-                        <a class="dropdown-item" href="#">
-                            <img src="@t.iconUrl" /> @t.name
-                        </a>
-                    }
-                </div>
+    @if (Issue == null)
+    {
+        <div class="card-body">
+            <div class="row justify-content-center">
+                <em class="col-auto">Isse @IssueId removed!</em>
             </div>
-            <div class="col"></div>
-            <div class="col-auto">
-                <button class="btn btn-sm btn-outline-warning border-0" @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction
-                                                                           { IssueId = Issue.id }))">
-                    <i class="fas fa-window-minimize"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="card-title">
-            <div class="row no-gutters">
-                <h5 class="col">
-                    @Issue.key
-                </h5>
+            <div class="row justify-content-center">
                 <div class="col-auto">
-                    <button class="btn btn-outline-secondary border-0" type="button">
-                        <img src="@Issue.fields.status.iconUrl" /> @Issue.fields.status.name
+                    <button class="btn btn-outline-info" type="button"
+                            @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction { IssueId = IssueId }))">
+                        OK
                     </button>
                 </div>
             </div>
         </div>
-        <p>@Issue.fields.summary</p>
-    </div>
+    }
+    else
+    {
+        <div class="card-header p-0">
+            <div class="row no-gutters">
+                <div class="col-auto dropdown">
+                    <button class="btn btn-outline-info dropdown-toggle border-0"
+                            type="button"
+                            disabled="@(Busy)"
+                            data-toggle="dropdown">
+                        <img src="@Issue.fields.issuetype.iconUrl" /> @Issue.fields.issuetype.name
+                    </button>
+                    <div class="dropdown-menu">
+                        @foreach (var t in IssueTypes)
+                        {
+                            <a class="dropdown-item" href="#" @onclick="@(() => UpdateType(t.id))">
+                                <img src="@t.iconUrl" /> @t.name
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="col"></div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-warning border-0"
+                            @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction { IssueId = Issue.id }))">
+                        <i class="fas fa-window-minimize"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="card-title">
+                <div class="row no-gutters align-items-center">
+                    <h5 class="col mb-0">
+                        @Issue.key
+                    </h5>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-info border-0" type="button" disabled="@(Transitions != null || Busy)" @onclick="@GetTransitions">
+                            <img src="@Issue.fields.status.iconUrl" /> @Issue.fields.status.name
+                        </button>
+                    </div>
+                </div>
+                @if (Transitions != null)
+                {
+                    <div class="row">
+                        <div class="col-auto pr-0">
+                            <i class="far fa-hand-point-right fa-2x"></i>
+                        </div>
+                        @foreach (var t in Transitions)
+                        {
+                            <div class="col-auto">
+                                <button class="btn btn-outline-info" type="button" disabled="@(Busy)"
+                                        @onclick="@(() => IssueTransition(t.id))">
+                                    <img src="@t.to.iconUrl" /> @t.to.name
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <p>@Issue.fields.summary</p>
+            @if (OMWProject != null)
+            {
+                <div class="row mb-2">
+                    <div class="col-auto">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="col-auto">
+                        Type @OMWProject.F98220_OMWTYP
+                    </div>
+                    <div class="col-auto">
+                        Status @OMWProject.F98220_OMWPS
+                    </div>
+                </div>
+            }
+            <div class="row">
+                <label class="col-4" for="estimate">Estimate</label>
+                @if (Issue.fields.status.id.Equals(OMWPlannerState.JiraTriggerEstimate))
+                {
+                    <input id="estimate" class="col-6 form-control" type="text" spellcheck="false" placeholder="2w 4d 6h 45m" @bind="@Estimate" />
+                }
+                else if (Issue.fields.timetracking != null)
+                {
+                    <div class="col-6">@Issue.fields.timetracking.originalEstimate</div>
+                }
+            </div>
+            <div class="row adjust-content-center">
+                <em class="col text-danger">@TimePatternError</em>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     [Parameter]
     public string IssueId { get; set; }
+    bool Busy { get; set; }
+    string TimePatternError { get; set; }
     Jira.Response.Issue Issue => OMWPlannerState
         .JiraIssues
         .FirstOrDefault(i => i.id.Equals(IssueId));
@@ -54,4 +124,82 @@
         .Where(t => !t.subtask)
         .Except(new Jira.Response.IssueType[] { Issue.fields.issuetype },
                 new Jira.Response.ComparableBase<Jira.Response.IssueType>());
+    F98220.Row OMWProject => OMWPlannerState.OMWProjects.FirstOrDefault(omw => omw.F98220_OMWPRJID.Equals(Issue?.key));
+    IEnumerable<Jira.Response.Transition> Transitions => AppState.Transitions.GetValueOrDefault(IssueId);
+    string estimate;
+    string Estimate
+    {
+        get => estimate ?? Issue.fields.timetracking?.originalEstimate;
+        set
+        {
+            TimePatternError = string.Empty;
+            estimate = value.Trim();
+            if (!string.IsNullOrEmpty(estimate))
+            {
+                if (Jira.TimePattern.IsMatch(value))
+                {
+                    _ = UpdateTimetracking();
+                }
+                else
+                {
+                    TimePatternError = "Enter a number followed with w, d, h or m.";
+                }
+            }
+        }
+    }
+    async Task UpdateTimetracking()
+    {
+        await Mediator.Send(new OMWPlannerState.JiraEditIssueAction
+        {
+            IssueIdOrKey = IssueId,
+            Update = new Jira.Request.Update
+            {
+                timetracking = new[]
+                {
+                                new Jira.Request.FieldUpdate<Jira.Request.Timetracking>
+                                {
+                                    set = new Jira.Request.Timetracking
+                                    {
+                                        originalEstimate = estimate
+                                    }
+                                }
+                            }
+            }
+        });
+        estimate = Issue.fields.timetracking?.originalEstimate;
+        InvokeAsync(StateHasChanged);
+    }
+    async Task GetTransitions()
+    {
+        Busy = true;
+        await Mediator.Send(new AppState.GetTransitionsAction { IssueId = IssueId });
+        Busy = false;
+    }
+    async Task IssueTransition(string transitionId)
+    {
+        Busy = true;
+        await Mediator.Send(new OMWPlannerState.JiraIssueTransitionAction
+        {
+            IssueIdOrKey = IssueId,
+            TransitionId = transitionId
+        });
+        await Mediator.Send(new AppState.ClearTransitionsAction { IssueId = IssueId });
+        Busy = false;
+    }
+    async Task UpdateType(string typeId)
+    {
+        Busy = true;
+        await Mediator.Send(new OMWPlannerState.JiraEditIssueAction
+        {
+            IssueIdOrKey = IssueId,
+            Fields = new Jira.Request.Fields
+            {
+                issuetype = new Jira.Request.Id
+                {
+                    id = typeId
+                }
+            }
+        });
+        Busy = false;
+    }
 }

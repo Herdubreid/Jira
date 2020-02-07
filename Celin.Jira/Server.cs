@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +22,7 @@ namespace Celin.Jira
         string BaseUrl { get; }
         ILogger Logger { get; }
         HttpClient Http { get; }
+        public Regex TimePattern { get; } = new Regex(@"(\d+[w|d|h|m])+\z");
         public async Task<T> GetAsync<T>(Request.Base request, CancellationTokenSource cancel = null)
         {
             HttpResponseMessage responseMessage;
@@ -143,12 +145,13 @@ namespace Celin.Jira
                 throw new Exception(error);
             }
         }
-        public async Task<Response.Issues> Search(string jql)
+        public async Task<Response.Issues> Search(string jql, IEnumerable<string> fields)
             => await PostAsync<Response.Issues>(new Request.Search
             {
-                RequestBody = new Request.RequestBody
+                RequestBody = new Request.SearchBody
                 {
-                    jql = jql
+                    jql = jql,
+                    fields = fields
                 }
             });
         public async Task<Response.Comments> ListComments(string issueIdOrKey)
@@ -160,7 +163,7 @@ namespace Celin.Jira
             => await PostAsync<Response.Comment>(new Request.Issue.Comment
             {
                 IdOrKey = issueIdOrKey,
-                RequestBody = new Request.RequestBody
+                RequestBody = new Request.EditBody
                 {
                     body = new Request.DocFormat<Request.ParagraphDoc<Request.TextContent>>
                     {
@@ -186,7 +189,7 @@ namespace Celin.Jira
             => await PostAsync<Response.Empty>(new Request.Issue.Transition
             {
                 IdOrKey = issueIdOrKey,
-                RequestBody = new Request.RequestBody
+                RequestBody = new Request.EditBody
                 {
                     transition = new Request.Id
                     {
@@ -199,19 +202,20 @@ namespace Celin.Jira
             {
                 IdOrKey = issueIdOrKey
             });
-        public async Task EditIssu(string issueIdOrKey, Request.Fields fields)
+        public async Task EditIssu(string issueIdOrKey, Request.Fields fields, Request.Update update = null)
             => await PutAsync(new Request.Issue
             {
                 IdOrKey = issueIdOrKey,
-                RequestBody = new Request.RequestBody
+                RequestBody = new Request.EditBody
                 {
-                    fields = fields
+                    fields = fields,
+                    update = update
                 }
             });
         public async Task<Response.Base> AddIssue(string projectIdOrKey, string issueTypeId, string summary, IEnumerable<string> description, IEnumerable<string> labels)
             => await PostAsync<Response.Base>(new Request.Issue
             {
-                RequestBody = new Request.RequestBody
+                RequestBody = new Request.EditBody
                 {
                     fields = new Request.Fields
                     {
