@@ -2,7 +2,7 @@
 @import '../node_modules/bootstrap/scss/bootstrap';
 @import './bootswatch';
 
-.card-columns {
+.card-column {
     @include media-breakpoint-only(xl) {
         column-count: 4;
     }
@@ -35,8 +35,9 @@
     z-index: 4;
 }
 
-.mw-340 {
-    min-width: 340px;
+.min-width-340 {
+    min-width: 310px;
+    max-width: 400px;
 }
 
 #blazor-error-ui {

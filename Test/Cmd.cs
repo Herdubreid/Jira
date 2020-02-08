@@ -182,17 +182,28 @@ namespace Test
             class GetCmd : IssueBaseCmd
             {
                 [Argument(1, Description = "Id")]
-                [Required]
-                int Id { get; set; }
+                int? Id { get; set; }
                 async Task OnExecuteAsync()
                 {
-                    var rs = await Jira.GetAsync<Response.Comment>(new Request.Issue.Comment.Get
+                    if (Id.HasValue)
                     {
-                        IdOrKey = IssueIdOrKey,
-                        id = Id
-                    });
-                    var s = JsonSerializer.Serialize(rs, new JsonSerializerOptions { WriteIndented = true });
-                    Console.WriteLine(s);
+                        var rs = await Jira.GetAsync<Response.Comment>(new Request.Issue.Comment.Get
+                        {
+                            IdOrKey = IssueIdOrKey,
+                            id = Id.Value
+                        });
+                        var s = JsonSerializer.Serialize(rs, new JsonSerializerOptions { WriteIndented = true });
+                        Console.WriteLine(s);
+                    }
+                    else
+                    {
+                        var rs = await Jira.GetAsync<Response.Comments>(new Request.Issue.Comment.Get
+                        {
+                            IdOrKey = IssueIdOrKey
+                        });
+                        var s = JsonSerializer.Serialize(rs, new JsonSerializerOptions { WriteIndented = true });
+                        Console.WriteLine(s);
+                    }
                 }
                 public GetCmd(IStore store, IMediator mediator, Celin.Jira.Server jira) : base(store, mediator, jira) { }
             }

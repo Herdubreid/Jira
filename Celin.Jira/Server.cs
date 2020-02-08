@@ -120,7 +120,6 @@ namespace Celin.Jira
                 }
                 else
                 {
-
                     try
                     {
                         T result = JsonSerializer.Deserialize<T>(
@@ -159,7 +158,7 @@ namespace Celin.Jira
             {
                 IdOrKey = issueIdOrKey
             });
-        public async Task<Response.Comment> AddComment(string issueIdOrKey, IEnumerable<string> paras)
+        public async Task<Response.Comment> AddComment(string issueIdOrKey, IEnumerable<string> comment)
             => await PostAsync<Response.Comment>(new Request.Issue.Comment
             {
                 IdOrKey = issueIdOrKey,
@@ -167,7 +166,7 @@ namespace Celin.Jira
                 {
                     body = new Request.DocFormat<Request.ParagraphDoc<Request.TextContent>>
                     {
-                        content = paras.Select(p => new Request.ParagraphDoc<Request.TextContent>
+                        content = comment.Select(p => new Request.ParagraphDoc<Request.TextContent>
                         {
                             content = new Request.TextContent[]
                             {
@@ -249,6 +248,11 @@ namespace Celin.Jira
             => await GetAsync<IEnumerable<Response.TaskType>>(new Request.Project.Statuses
             {
                 IdOrKey = projectIdOrKey
+            });
+        public async Task<Response.Comments> GetComments(string issueIdOrKey)
+            => await GetAsync<Response.Comments>(new Request.Issue.Comment.Get
+            {
+                IdOrKey = issueIdOrKey
             });
         public Server(string baseUrl, string token, ILogger logger, HttpClient http = null)
         {

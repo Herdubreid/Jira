@@ -5,6 +5,10 @@ namespace Celin
 {
     public partial class AppState
     {
+        public class OMWRoleAction : IAction
+        {
+            public OMWRoles OMWRole { get; set; }
+        }
         public class GetTransitionsAction : IAction
         {
             public string IssueId { get; set; }

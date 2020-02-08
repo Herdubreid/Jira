@@ -1,10 +1,10 @@
 ﻿@page "/"
 @inherits AppStateComponent
 
-<div class="card-columns">
+<div class="card-deck justify-content-center">
     @if (OMWPlannerState.OMWProjects != null)
     {
-        foreach (var issue in AppState.JiraIssues)
+        foreach (var issue in Issues)
         {
             <JiraIssueCard IssueId="@issue"></JiraIssueCard>
         }
@@ -12,4 +12,22 @@
 </div>
 
 @code {
+    IEnumerable<string> Issues
+    {
+        get
+        {
+            if (AppState.OMWRole == OMWRoles.All)
+            {
+                return AppState.JiraIssues;
+            }
+
+            var statusKeys = OMWPlannerState.JiraRoleStatusKeys[AppState.OMWRole];
+
+            return OMWPlannerState.JiraIssues == null
+                ? Enumerable.Empty<string>()
+                : OMWPlannerState.JiraIssues
+                  .Where(i => statusKeys.Contains(i.fields.status.id))
+                  .Select(i => i.id);
+        }
+    }
 }

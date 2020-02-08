@@ -7275,19 +7275,19 @@ a.text-dark:hover, a.text-dark:focus {
   text-decoration: none; }
 
 @media (min-width: 1200px) {
-  .card-columns {
+  .card-column {
     column-count: 4; } }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  .card-columns {
+  .card-column {
     column-count: 3; } }
 
 @media (min-width: 768px) and (max-width: 991.98px) {
-  .card-columns {
+  .card-column {
     column-count: 2; } }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
-  .card-columns {
+  .card-column {
     column-count: 1; } }
 
 @media only screen and (min-width: 600px) {
@@ -7302,8 +7302,9 @@ a.text-dark:hover, a.text-dark:focus {
   width: 340px;
   z-index: 4; }
 
-.mw-340 {
-  min-width: 340px; }
+.min-width-340 {
+  min-width: 310px;
+  max-width: 400px; }
 
 #blazor-error-ui {
   background: lightyellow;

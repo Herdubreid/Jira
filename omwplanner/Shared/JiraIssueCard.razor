@@ -1,7 +1,7 @@
 ﻿@inherits AppStateComponent
 @inject Jira.Server Jira
 
-<div class="card shadow m-2">
+<div class="card shadow m-2 min-width-340">
     @if (Issue == null)
     {
         <div class="card-body">
@@ -41,6 +41,7 @@
                 <div class="col"></div>
                 <div class="col-auto">
                     <button class="btn btn-sm btn-outline-warning border-0"
+                            disabled="@(AppState.OMWRole != OMWRoles.All)"
                             @onclick="@(() => Mediator.Send(new AppState.ToggleJiraIssueAction { IssueId = Issue.id }))">
                         <i class="fas fa-window-minimize"></i>
                     </button>
@@ -61,19 +62,26 @@
                 </div>
                 @if (Transitions != null)
                 {
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-auto pr-0">
                             <i class="far fa-hand-point-right fa-2x"></i>
                         </div>
-                        @foreach (var t in Transitions)
-                        {
-                            <div class="col-auto">
-                                <button class="btn btn-outline-info" type="button" disabled="@(Busy)"
-                                        @onclick="@(() => IssueTransition(t.id))">
-                                    <img src="@t.to.iconUrl" /> @t.to.name
-                                </button>
+                        <div class="col">
+                            <div class="row justify-content-center">
+                                @foreach (var t in Transitions)
+                                {
+                                    <div class="col-auto p-1">
+                                        <button class="btn btn-outline-info" type="button" disabled="@(Busy)"
+                                                @onclick="@(() => IssueTransition(t.id))">
+                                            <img src="@t.to.iconUrl" /> @t.to.name
+                                        </button>
+                                    </div>
+                                }
                             </div>
-                        }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <textarea class="form-control" rows="4" placeholder="Comments..." @bind="@Comment"></textarea>
                     </div>
                 }
             </div>
@@ -114,6 +122,7 @@
     [Parameter]
     public string IssueId { get; set; }
     bool Busy { get; set; }
+    string Comment { get; set; }
     string JiraUrl => $"https://herdubreid.atlassian.net/browse/{Issue.key}";
     string TimePatternError { get; set; }
     Jira.Response.Issue Issue => OMWPlannerState
@@ -157,14 +166,14 @@
             {
                 timetracking = new[]
                 {
-                                new Jira.Request.FieldUpdate<Jira.Request.Timetracking>
-                                {
-                                    set = new Jira.Request.Timetracking
-                                    {
-                                        originalEstimate = estimate
-                                    }
-                                }
-                            }
+                    new Jira.Request.FieldUpdate<Jira.Request.Timetracking>
+                    {
+                        set = new Jira.Request.Timetracking
+                        {
+                            originalEstimate = estimate
+                        }
+                    }
+                }
             }
         });
         estimate = Issue.fields.timetracking?.originalEstimate;
@@ -182,7 +191,8 @@
         await Mediator.Send(new OMWPlannerState.JiraIssueTransitionAction
         {
             IssueIdOrKey = IssueId,
-            TransitionId = transitionId
+            TransitionId = transitionId,
+            Comment = Comment
         });
         await Mediator.Send(new AppState.ClearTransitionsAction { IssueId = IssueId });
         Busy = false;

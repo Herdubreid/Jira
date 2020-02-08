@@ -1,7 +1,7 @@
 ﻿@inherits AppStateComponent
 
 <div id="overlay">
-    @if (AppState.MaxStatusAccordion)
+    @if (AppState.ShowStatusAccordion)
     {
         <div id="projects" class="jumbotron p-2">
             <div class="row no-gutters justify-content-end">
@@ -12,7 +12,7 @@
                     </button>
                 </div>
             </div>
-            @foreach (var s in OMWPlannerState.JiraStatusKeys)
+            @foreach (var s in OMWPlannerState.JiraRoleStatusKeys[OMWRoles.All])
             {
                 <JiraStatusCard DataParent="#projects" StatusId="@s"></JiraStatusCard>
             }

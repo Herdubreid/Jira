@@ -6,16 +6,32 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
         <i class="fas fa-hamburger"></i>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarContent">
         <div class="row align-items-center w-100">
             <div class="col-auto">
                 <i class="far fa-clock fa-lg text-light"></i>
                 <span class="badge badge-info" style="position:relative;top:-5px;left:-5px;">@Elapsed</span>
             </div>
+            <div class="col dropdown">
+                <button class="btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+                    @AppState.OMWRole.ToString("g")
+                </button>
+                <div class="dropdown-menu">
+                    @foreach (OMWRoles r in Enum.GetValues(typeof(OMWRoles)))
+                    {
+                        if (r != AppState.OMWRole)
+                        {
+                            <a class="dropdown-item" href="#"
+                               @onclick="@(() => Mediator.Send(new AppState.OMWRoleAction { OMWRole = r }))" >@r.ToString("g")</a>
+                        }
+                    }
+                </div>
+            </div>
             <div class="col"></div>
             <div class="col-auto">
-                <button class="btn btn-outline-info" @onclick="@(() => Mediator.Send(new AppState.ToggleJiraStatusAccordianAction()))">
+                <button class="btn btn-outline-info"
+                        disabled="@(AppState.OMWRole != OMWRoles.All)"
+                        @onclick="@(() => Mediator.Send(new AppState.ToggleJiraStatusAccordianAction()))">
                     <i class="fas fa-list"></i>
                 </button>
             </div>

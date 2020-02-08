@@ -11,18 +11,6 @@ namespace Celin
 {
     public partial class OMWPlannerState
     {
-        public class ConfigHandler : ActionHandler<ConfigAction>
-        {
-            OMWPlannerState State => Store.GetState<OMWPlannerState>();
-            public override Task<Unit> Handle(ConfigAction aAction, CancellationToken aCancellationToken)
-            {
-                State.JiraProjectKey = aAction.JiraProjectKey;
-                State.JiraStatusKeys = aAction.JiraStatusKeys;
-
-                return Unit.Task;
-            }
-            public ConfigHandler(IStore store) : base(store) { }
-        }
         public class JiraEditIssueHandler : ActionHandler<JiraEditIssueAction>
         {
             readonly static SemaphoreSlim lockit = new SemaphoreSlim(1, 1);
@@ -67,6 +55,10 @@ namespace Celin
                     var ndx = State.JiraIssues.FindIndex(i => i.id.Equals(aAction.IssueIdOrKey));
                     var key = State.JiraIssues[ndx].key;
                     await Jira.TransitionIssue(aAction.IssueIdOrKey, aAction.TransitionId);
+                    if (!string.IsNullOrEmpty(aAction.Comment))
+                    {
+                        await Jira.AddComment(aAction.IssueIdOrKey, aAction.Comment.Split('\n'));
+                    }
                     State.JiraIssues[ndx] = await Jira.GetIssue(aAction.IssueIdOrKey);
                     if (State.JiraIssues[ndx].fields.status.id.Equals(State.JiraTriggerOMW) &&
                         !State.OMWProjects.Contains(new F98220.Row { F98220_OMWPRJID = key }))
@@ -193,7 +185,7 @@ namespace Celin
                             E1.RequestAsync<F98220.Response>(new F98220.Request()),
                             Jira.GetProject(State.JiraProjectKey),
                             Jira.GetTaskTypes(State.JiraProjectKey),
-                            Jira.Search($"project={State.JiraProjectKey} AND status in ({string.Join(',', State.JiraStatusKeys)})", JiraIssueSearchHandler.FIELDS)
+                            Jira.Search($"project={State.JiraProjectKey} AND status in ({string.Join(',', State.JiraRoleStatusKeys[OMWRoles.All])})", JiraIssueSearchHandler.FIELDS)
                         };
                         await Task.WhenAll(tasks);
 

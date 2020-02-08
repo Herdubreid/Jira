@@ -97,7 +97,7 @@ namespace Celin.Jira.Request
             public class Get : Comment
             {
                 public override string Path => $"{base.Path}/{id}";
-                public int id { get; set; }
+                public int? id { get; set; }
             }
         }
         public class Transition : Issue

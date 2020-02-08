@@ -1,5 +1,6 @@
 ﻿using BlazorState;
 using MediatR;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,6 +8,24 @@ namespace Celin
 {
     public partial class AppState
     {
+        public class OMWRoleHandler : ActionHandler<OMWRoleAction>
+        {
+            AppState State => Store.GetState<AppState>();
+            public override Task<Unit> Handle(OMWRoleAction aAction, CancellationToken aCancellationToken)
+            {
+                State.OMWRole = aAction.OMWRole;
+                if (State.OMWRole != OMWRoles.All)
+                {
+                    State.ShowStatusAccordion = false;
+                }
+
+                var handler = State.Changed;
+                handler?.Invoke(State, null);
+
+                return Unit.Task;
+            }
+            public OMWRoleHandler(IStore store) : base(store) { }
+        }
         public class GetTransitionsHandler : ActionHandler<GetTransitionsAction>
         {
             Jira.Server Jira { get; }
@@ -43,7 +62,7 @@ namespace Celin
             AppState State => Store.GetState<AppState>();
             public override Task<Unit> Handle(ToggleJiraStatusAccordianAction aAction, CancellationToken aCancellationToken)
             {
-                State.MaxStatusAccordion = aAction.Force.HasValue ? aAction.Force.Value : !State.MaxStatusAccordion;
+                State.ShowStatusAccordion = aAction.Force ?? !State.ShowStatusAccordion;
 
                 var handler = State.Changed;
                 handler?.Invoke(State, null);
@@ -64,7 +83,7 @@ namespace Celin
                 }
                 else
                 {
-                    State.JiraIssues.Insert(0, aAction.IssueId);
+                    State.JiraIssues.Add(aAction.IssueId);
                 }
 
                 var handler = State.Changed;

@@ -5,11 +5,6 @@ namespace Celin
 {
     public partial class OMWPlannerState
     {
-        public class ConfigAction : IAction
-        {
-            public string JiraProjectKey { get; set; }
-            public IEnumerable<string> JiraStatusKeys { get; set; }
-        }
         public class JiraEditIssueAction : IAction
         {
             public string IssueIdOrKey { get; set; }
@@ -20,6 +15,7 @@ namespace Celin
         {
             public string IssueIdOrKey { get; set; }
             public string TransitionId { get; set; }
+            public string Comment { get; set; }
         }
         public class JiraIssueSearchAction : IAction
         {
