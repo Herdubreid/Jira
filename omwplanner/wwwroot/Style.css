@@ -7302,7 +7302,7 @@ a.text-dark:hover, a.text-dark:focus {
   width: 340px;
   z-index: 4; }
 
-.min-width-340 {
+.card-width {
   min-width: 310px;
   max-width: 400px; }
 

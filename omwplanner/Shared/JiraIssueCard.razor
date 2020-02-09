@@ -1,7 +1,7 @@
 ﻿@inherits AppStateComponent
 @inject Jira.Server Jira
 
-<div class="card shadow m-2 min-width-340">
+<div class="card shadow m-2 card-width">
     @if (Issue == null)
     {
         <div class="card-body">
@@ -195,6 +195,7 @@
             Comment = Comment
         });
         await Mediator.Send(new AppState.ClearTransitionsAction { IssueId = IssueId });
+        Comment = string.Empty;
         Busy = false;
     }
     async Task UpdateType(string typeId)

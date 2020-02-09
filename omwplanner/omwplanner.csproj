@@ -4,17 +4,11 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Celin</RootNamespace>
     <UserSecretsId>723ebf55-e42b-4b0e-99c8-91277eb6e66f</UserSecretsId>
-    <ServiceWorkerForce>true</ServiceWorkerForce>
     <ManifestShortName>OMW</ManifestShortName>
     <ManifestLongName>OMW Planner</ManifestLongName>
-    <ServiceWorkerCacheVersion>3</ServiceWorkerCacheVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorPWA.MSBuild" Version="1.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Azure.SignalR" Version="1.2.3" />
   </ItemGroup>
 
